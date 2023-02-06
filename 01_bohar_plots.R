@@ -99,7 +99,7 @@ LBplotA <- ggplot()+
 
 LBplotA
 
-# next plot
+# niche space plot
 
 
 LB2 <- read.csv(paste(dr.dir,  ("Boharadj.csv"), sep = '/'))%>%
@@ -146,3 +146,4 @@ LBplotB <- ggplot(LB2,aes(x = C, y = N, colour = Location, fill = Location))+
 LBplotB
 
 
+# next plot
