@@ -2,6 +2,9 @@
 ## Making figures for publication
 #################################
 
+## 01 L. bohar graphs
+
+
 ## Load libraries
 
 library(plyr)
@@ -77,6 +80,7 @@ Theme1 <- theme_minimal()+
 
 
 # CN plot ----
+# LB Plot A ----
 
 LBplotA <- ggplot()+ 
   geom_point(data=LB_means, aes(x=Cm, y=Nm, colour=Location, fill=Location))+
@@ -101,7 +105,7 @@ LBplotA <- ggplot()+
                      xmin = -14.513 - -2.045, xmax = -14.513 + -2.045), cex =1, lty = 2, colour = "#85C660")+
   Theme1
 
-LBplotA
+LBplotA <- LBplotA + theme(legend.position = "none")
 
 # niche space plot ----
 
@@ -133,6 +137,8 @@ stat_chull <- function(mapping = NULL, data = NULL, geom = "polygon",
 
 # plot out convex hulls for niche space of each species
 
+# LB PLot B ----
+
 LBplotB <- ggplot(LB2,aes(x = C, y = N, colour = Location, fill = Location))+
   # geom_point(size = 3.5)+
   stat_chull(size = 0.5, alpha = 0.3)+
@@ -152,23 +158,23 @@ LBplotB
 
 # niche size box plot ----
 
-install.packages("nicheROVER")
-install.packages("mvtnorm")
-install.packages("siar")
+
+library(siar) #package is not working any more. use install.packages("SIBER") instead
 
 library(nicheROVER)
 library(mvtnorm)
-library(siar) #package is not working any more. use install.packages("SIBER") instead
+#install.packages("mvtnorm")
+library(siar)
+#install.packages("siar")
+dir()
 
 
-lb <- read.csv(paste(dr.dir, ("Boharadj.csv"), sep='/'),stringsAsFactors = FALSE) %>%
- # mutate_at(vars(Location, Sample.ID), list(as.factor)) %>% # make these columns as factors
-  glimpse()
+lb <- read.csv(paste(dr.dir, ("Boharadj.csv"),sep = '/'),stringsAsFactors = FALSE)
 
-# subset to remove muscle tissue samples
-iso_fin <- subset(iso_data,sample_type == "fin clip")
-iso_fin$Trip = factor(iso_fin$Trip, levels=c('1','2'), labels=c("Trip 1", "Trip 2"))
 lb$Location <- as.factor(lb$Location)
+summary(lb$Location)
+glimpse(lb)
+
 
 
 attach(lb)
@@ -183,8 +189,6 @@ detach(lb)
 fish <-lb
 aggregate(fish[5:6], fish[1], mean)
 
-
-
 # generate parameter draws from the 'default' posteriors of each fish
 nsamples <- 10000
 system.time({
@@ -193,7 +197,7 @@ system.time({
 })
 
 # mu1 (del15N), mu2 (del13C), and Sigma12
-clrs <- c("#FF6F00B2","#C71000B2")
+clrs <- c("#d8d97a","#95c36e")
 par(mar = c(4, 4, 0.5, 0.1) + 0.1, mfrow = c(1, 3))
 niche.par.plot(fish.par, col = clrs, plot.index = 1)
 niche.par.plot(fish.par, col = clrs, plot.index = 2)
@@ -271,7 +275,7 @@ niche.size <- function(Sigma, alpha = .95) {
 fish.size <- sapply(fish.par, function(spec) {
   apply(spec$Sigma, 3, niche.size, alpha = .95)
 })
-
+fish.size
 
 # point estimate and standard error
 rbind(est = colMeans(fish.size),
@@ -283,19 +287,54 @@ rbind(est = colMeans(fish.size),
 
 par(mfrow = c(1,1))
 
-lb.niche.size <- boxplot(fish.size, col = clrs, pch = 16, cex = .5,
-                         ylab = "Niche Size", xlab = "Location", main = "L. bohar", ylim = c(0,35))
+fish.size # to make this a ggplot, let's change this from long to wide format because this is pretty unusable
+fish.size.df <- as.data.frame(fish.size)
+colnames(fish.size.df) # there is a space after Chagos, which is an easy fix and makes everything a little bit annoying to work with
+summary(fish.size.df) 
 
-tiff("lb.niche.size.tiff", width = 9, height = 6.5, units = 'in', res = 300)
-niche.size.box <- boxplot(fish.size, col = clrs, pch = 16, cex = .5,ylab = "Niche Size", xlab = "Location", ylim = c(0,35))
-dev.off()
+#install.packages("janitor")
+library(janitor)
+
+#can be done by simply
+fish.size.df <- clean_names(fish.size.df)
+colnames(fish.size.df)
+
+# The arguments to gather():
+# - data: Data object
+# - key: Name of new key column (made from names of data columns)
+# - value: Name of new value column
+# - ...: Names of source columns that contain values
+# - factor_key: Treat the new key column as a factor (instead of character vector)
+
+data_long <- gather(fish.size.df, Location, nichesize, chagos:sr, factor_key=TRUE)
+glimpse(data_long)
+
+# Now we can use ggboxplot
+
+library(tidyverse)
+library(ggplot2)
+
+#Plot C ----
+
+LBplotC <- ggplot(data_long, aes(x=Location, y=nichesize,  fill=Location))+
+  geom_boxplot(notch=TRUE, show.legend = FALSE)+
+  ylab("Niche Size")+
+  #ggtitle("Lutjanus bohar")+
+  scale_x_discrete(labels=c("chagos" = "Chagos", "sr" = "Scott Reefs"))+
+  scale_fill_manual(values =pal, 
+                     labels = c("Chagos", "Scott Reefs"))+
+  ylim(0, 35)+
+  Theme1
+
+LBplotC
 
 
-# Combine plots ----
+# combining plots ----
 
 library(patchwork)
 
-bohar_plots <- LBplotA + LBplotB+ plot_annotation(tag_levels = 'A') + plot_layout(guides = 'collect')
+
+bohar_plots <- LBplotA + LBplotB+ LBplotC + plot_annotation(tag_levels = 'A') + plot_layout(guides = 'collect')
 bohar_plots
 
 ?ggsave
@@ -303,3 +342,5 @@ bohar_plots
 setwd(p.dir)
 
 ggsave("Lbohar.tiff", plot=bohar_plots, width=10, height=5, dpi=300)
+
+# Fin
