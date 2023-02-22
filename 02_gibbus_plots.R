@@ -71,7 +71,7 @@ LG_means <- df_LG %>%
             Csd = sd(C))
 
 
-# Set a theme
+# Set a theme ----
 
 Theme1 <- theme_minimal()+
   theme(
@@ -359,3 +359,5 @@ gibbus_plots
 setwd(p.dir)
 
 ggsave("Lgibbus.tiff", plot=gibbus_plots, width=13, height=4.5, dpi=300)
+
+# Fin

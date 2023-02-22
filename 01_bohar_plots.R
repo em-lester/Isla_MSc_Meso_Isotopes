@@ -56,7 +56,7 @@ str(df)
 
 LB_means <- df_LB %>%
   group_by(Location) %>% 
-  summarise(Nm = mean(N), 
+  dplyr::summarise(Nm = mean(N), 
             Nsd = sd(N), 
             Cm = mean(C), 
             Csd = sd(C))

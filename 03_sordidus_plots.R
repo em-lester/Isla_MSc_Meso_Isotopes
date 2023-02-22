@@ -109,21 +109,22 @@ CSplot <- ggplot(data = CS_means, ylim = c(6, 14), xlim = c(-19, -17))+
                      labels = c("Chagos", "Scott Reefs"))+ 
   xlab(expression(atop(bold(~delta^13~"C " ("\u2030 " [vs]~"VPDB")))))+ 
   ylab(expression(atop(bold(~delta^15~"N " ("\u2030 " [vs]~"air")))))+
+  ggtitle("Chlorurus sordidus")+
   Theme1
 
 CSplotA <- CSplot + theme(legend.position = "none")
 CSplotA
 
 # niche space plot ----
-# read in niche space data ----
+# read plot B data ----
 
-LG2 <- read.csv(paste(dr.dir,  ("Gibbusadj.csv"), sep = '/'))%>%
+CS2 <- read.csv(paste(dr.dir,  ("Sordidus.csv"), sep = '/'))%>%
   mutate_at(vars(Location), list(as.factor)) %>% # make these columns as factors
   glimpse()
 
 # order factors 
 
-LG2$Location <- factor(LG2$Location, levels = c("Chagos ", "SR", "Maldives "))
+CS2$Location <- factor(CS2$Location, levels = c("Chagos ", "SR"))
 
 # create convex hull function from this website:
 #https://cran.r-project.org/web/packages/ggplot2/vignettes/extending-ggplot2.html
@@ -146,40 +147,34 @@ stat_chull <- function(mapping = NULL, data = NULL, geom = "polygon",
   )
 }
 
+
 # plot out convex hulls for niche space of each species
 # plot B ----
 
-LGplotB <- ggplot(LG2,aes(x = C, y = N, colour = Location, fill = Location))+
+CSplotB <- ggplot(CS2,aes(x = C, y = N, colour = Location, fill = Location))+
   # geom_point(size = 3.5)+
   stat_chull(size = 0.5, alpha = 0.3)+
-  scale_x_continuous(limits = c(-18, -8),breaks=seq(-18, -8, 2))+ 
-  scale_y_continuous(limits = c(8,16),breaks=seq(8, 16, 2))+
-  scale_color_manual(values =c("Chagos " = "#FF6F00B2", "Maldives " = "#8A4198B2", "SR" = "#C71000B2"),
-                     labels = c("Chagos", "Scott Reefs", "Maldives"))+
-  scale_fill_manual(values =c("Chagos " = "#FF6F00B2", "Maldives " = "#8A4198B2", "SR" = "#C71000B2"),
-                    labels = c("Chagos", "Scott Reefs", "Maldives"))+
-  # facet_wrap( ~ Trip, ncol = 1)+
+  scale_x_continuous(limits = c(-16, -8),breaks=seq(-16, -8, 2))+ 
+  scale_y_continuous(limits = c(5,11),breaks=seq(5, 11, 2))+
+  scale_color_manual(values =c("Chagos " = "#FF6F00B2", "SR" = "#C71000B2"), 
+                     labels = c("Chagos", "Scott Reefs"))+ 
+  scale_fill_manual(values =c("Chagos " = "#FF6F00B2", "SR" = "#C71000B2"), 
+                    labels = c("Chagos", "Scott Reefs"))+ 
+  Theme1+
   ylab(expression(atop(bold(~delta^15~"N " ("\u2030 " [vs]~"air"))))) + 
-  xlab(expression(atop(bold(~delta^13~"C " ("\u2030 " [vs]~"VPDB"))))) +
-  Theme1
+  xlab(expression(atop(bold(~delta^13~"C " ("\u2030 " [vs]~"VPDB"))))) 
 
-LGplotB
-
+CSplotB
 
 
 # niche size box plot ----
 # plot C read in data ----
+
 library(nicheROVER)
 library(mvtnorm)
 library(siar) #package is not working any more. use install.packages("SIBER") instead
 
-lg <- read.csv("Gibbusadj.csv",stringsAsFactors = FALSE)
-
-# order factors 
-
-lg$Location <- factor(lg$Location, levels = c("Chagos ", "SR", "Maldives "))
-
-attach(lg)
+attach(CS)
 stderr <- function(x) sd(x)/sqrt(length(na.omit(x))) #standard error function
 n_mean=tapply(N,list(Location), mean) #group fish into means by year
 n_meanD=as.data.frame(n_mean)
@@ -187,8 +182,8 @@ c_mean=tapply(C,list(Location), mean) #group fish into means by year
 c_meanD=as.data.frame(c_mean)
 fish=data.frame(n_meanD,c_meanD)
 fish$Location=rownames(fish)#create dataframe so ggplot can read data
-detach(lg)
-fish <-lg
+detach(CS)
+fish <-CS
 aggregate(fish[5:6], fish[1], mean)
 
 
@@ -318,7 +313,7 @@ colnames(fish.size.df)
 # - ...: Names of source columns that contain values
 # - factor_key: Treat the new key column as a factor (instead of character vector)
 
-data_long <- gather(fish.size.df, Location, nichesize, chagos:maldives, factor_key=TRUE)
+data_long <- gather(fish.size.df, Location, nichesize, chagos:sr, factor_key=TRUE)
 glimpse(data_long)
 
 # Now we can use ggboxplot
@@ -328,29 +323,32 @@ library(ggplot2)
 
 #Plot C ----
 
-LGplotC <- ggplot(data_long, aes(x=Location, y=nichesize,  fill=Location))+
+CSplotC <- ggplot(data_long, aes(x=Location, y=nichesize,  fill=Location))+
   geom_boxplot(notch=TRUE, show.legend = FALSE)+
   ylab("Niche Size")+
   #ggtitle("Lutjanus bohar")+
-  scale_x_discrete(labels=c("chagos" = "Chagos", "sr" = "Scott Reefs","maldives" = "Maldives"))+
+  scale_x_discrete(labels=c("chagos" = "Chagos", "sr" = "Scott Reefs"))+
   scale_fill_manual(values =clrs, 
-                    labels = c("Chagos","Scott Reefs", "Maldives"))+
+                    labels = c("Chagos","Scott Reefs"))+
   ylim(0, 35)+
   Theme1
+CSplotC 
 
-LGplotC
-LGplotB
-LGplotA
+CSplotC
+CSplotB
+CSplotA
 
 # Combine plots ----
 
 library(patchwork)
 
-gibbus_plots <- LGplotA + LGplotB + LGplotC + plot_annotation(tag_levels = 'A') + plot_layout(guides = 'collect')
-gibbus_plots
+sordidus_plots <- CSplotA + CSplotB + CSplotC + plot_annotation(tag_levels = 'A') + plot_layout(guides = 'collect')
+sordidus_plots
 
 ?ggsave
 
 setwd(p.dir)
 
-ggsave("Lgibbus.tiff", plot=gibbus_plots, width=13, height=4.5, dpi=300)
+ggsave("Csordidus.tiff", plot=sordidus_plots, width=13, height=4.5, dpi=300)
+
+# Fin
