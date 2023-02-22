@@ -39,10 +39,12 @@ dir()
 
 # Plot for L. Bohar
 
-pal <- met.brewer(name="Hokusai3", n=5, type="discrete")
+#palette ----
+
+pal <- met.brewer(name="Renoir", n=3, type="discrete")
 pal
   
-
+clrs <- c("#FF6F00B2","#C71000B2")
 
 df_LB <- read.csv(paste(dr.dir,  ("Bohar2.csv"), sep = '/'), fileEncoding="UTF-8-BOM")%>% #Table 2 from paper
   mutate_at(vars(Location, Sample.ID), list(as.factor)) %>% # make these columns as factors
@@ -92,7 +94,7 @@ LBplotA <- ggplot()+
                      xmin = Cm - Csd, xmax = Cm + Csd,  colour = Location), cex = 1)+ 
   scale_x_continuous(limits = c(-18, -8),breaks=seq(-18, -8, 2))+ 
   scale_y_continuous(limits = c(8,16),breaks=seq(8, 16, 2))+
-  scale_color_manual(values =pal, 
+  scale_color_manual(values =clrs, 
                      labels = c("Chagos", "Scott Reefs"))+
   scale_fill_manual(values =pal, 
                      labels = c("Chagos", "Scott Reefs"))+
@@ -100,12 +102,13 @@ LBplotA <- ggplot()+
   ylab(expression(atop(bold(~delta^15~"N " ("\u2030 " [vs]~"air")))))+
   ggtitle("Lutjanus bohar")+
   geom_errorbar(aes(x = -14.513, 
-                         ymin = 13.434 - 1, ymax = 13.434 + 1), cex = 1, lty = 2, colour = "#85C660")+
+                         ymin = 13.434 - 1, ymax = 13.434 + 1), cex = 1, lty = 2, colour = "#C71000B2")+
   geom_errorbarh(aes(y = 13.434, 
-                     xmin = -14.513 - -2.045, xmax = -14.513 + -2.045), cex =1, lty = 2, colour = "#85C660")+
+                     xmin = -14.513 - -2.045, xmax = -14.513 + -2.045), cex =1, lty = 2, colour = "#C71000B2")+
   Theme1
 
 LBplotA <- LBplotA + theme(legend.position = "none")
+LBplotA
 
 # niche space plot ----
 
@@ -144,9 +147,9 @@ LBplotB <- ggplot(LB2,aes(x = C, y = N, colour = Location, fill = Location))+
   stat_chull(size = 0.5, alpha = 0.3)+
   scale_x_continuous(limits = c(-18, -8),breaks=seq(-18, -8, 2))+ 
   scale_y_continuous(limits = c(8,16),breaks=seq(8, 16, 2))+
-  scale_color_manual(values =pal, 
+  scale_color_manual(values =clrs, 
                      labels = c("Chagos", "Scott Reefs"))+
-  scale_fill_manual(values =pal, 
+  scale_fill_manual(values =clrs, 
                     labels = c("Chagos", "Scott Reefs"))+
   # facet_wrap( ~ Trip, ncol = 1)+
   ylab(expression(atop(bold(~delta^15~"N " ("\u2030 " [vs]~"air"))))) + 
@@ -197,7 +200,7 @@ system.time({
 })
 
 # mu1 (del15N), mu2 (del13C), and Sigma12
-clrs <- c("#d8d97a","#95c36e")
+#clrs <- c("#d8d97a","#95c36e")
 par(mar = c(4, 4, 0.5, 0.1) + 0.1, mfrow = c(1, 3))
 niche.par.plot(fish.par, col = clrs, plot.index = 1)
 niche.par.plot(fish.par, col = clrs, plot.index = 2)
@@ -321,7 +324,7 @@ LBplotC <- ggplot(data_long, aes(x=Location, y=nichesize,  fill=Location))+
   ylab("Niche Size")+
   #ggtitle("Lutjanus bohar")+
   scale_x_discrete(labels=c("chagos" = "Chagos", "sr" = "Scott Reefs"))+
-  scale_fill_manual(values =pal, 
+  scale_fill_manual(values =clrs, 
                      labels = c("Chagos", "Scott Reefs"))+
   ylim(0, 35)+
   Theme1
@@ -341,6 +344,6 @@ bohar_plots
 
 setwd(p.dir)
 
-ggsave("Lbohar.tiff", plot=bohar_plots, width=10, height=5, dpi=300)
+ggsave("Lbohar.tiff", plot=bohar_plots, width=10, height=3.5, dpi=300)
 
 # Fin

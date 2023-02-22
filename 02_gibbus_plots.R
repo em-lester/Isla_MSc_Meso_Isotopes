@@ -3,7 +3,7 @@
 #################################
 
 ## 02 L. gibbus graphs
-## Load libraries
+## Load libraries ----
 
 library(plyr)
 library(dplyr)
@@ -11,6 +11,9 @@ library(stringr)
 library(ggplot2)
 library(tidyverse)
 library(MetBrewer)
+#install.packages("ggsci")
+library(ggsci)
+library(scales)
 
 # clear workspace ----
 rm(list = ls())
@@ -37,13 +40,19 @@ dir()
 
 # Plot for L. gibbus
 
+# colour palettes ----
+
 pal <- met.brewer(name="Hokusai3", n=5, type="discrete")
 pal
 
+mypal <- pal_futurama("planetexpress", alpha = 0.7)(5)
+mypal
+sp <- show_col(mypal)
 
+# read in data gibbus plot A ----
 
-df_LG <- read.csv(paste(dr.dir,  ("Gibbusadj.csv"), sep = '/'), fileEncoding="UTF-8-BOM")%>% #Table 2 from paper
-  mutate_at(vars(Location, Sample.ID), list(as.factor)) %>% # make these columns as factors
+df_LG <- read.csv(paste(dr.dir,  ("Gibbus.csv"), sep = '/'), fileEncoding="UTF-8-BOM")%>% #Table 2 from paper
+  mutate_at(vars(Location, Size), list(as.factor)) %>% # make these columns as factors
   glimpse()
 head(df_LG)
 str(df_LG)
@@ -60,8 +69,6 @@ LG_means <- df_LG %>%
             Nsd = sd(N), 
             Cm = mean(C), 
             Csd = sd(C))
-
-LG_means
 
 
 # Set a theme
@@ -85,8 +92,7 @@ Theme1 <- theme_minimal()+
 
 
 # CN plot ----
-
-
+# LG Plot A ----
 
 LGplotA <- ggplot()+ 
   geom_errorbar(data = LG_means, 
@@ -97,25 +103,26 @@ LGplotA <- ggplot()+
                      xmin = Cm - Csd, xmax = Cm + Csd, colour = Location), cex = 1)+
   scale_x_continuous(limits = c(-18, -8),breaks=seq(-18, -8, 2))+ 
   scale_y_continuous(limits = c(8,16),breaks=seq(8, 16, 2))+
-  scale_color_manual(values =pal, 
+  scale_color_manual(values =c("Chagos " = "#FF6F00B2", "Maldives " = "#8A4198B2", "SR" = "#C71000B2"),
                      labels = c("Chagos", "Scott Reefs", "Maldives"))+
-  scale_fill_manual(values =pal, 
+  scale_fill_manual(values =mypal, 
                     labels = c("Chagos", "Scott Reefs", "Maldives"))+
   xlab(expression(atop(bold(~delta^13~"C " ("\u2030 " [vs]~"VPDB")))))+ 
   ylab(expression(atop(bold(~delta^15~"N " ("\u2030 " [vs]~"air")))))+
   ggtitle("Lutjanus gibbus")+
-  Theme1
-
-LGplotA
-
-LG2 <- LGplot + geom_errorbar(aes(x = -14.254, 
-                                  ymin = 12.804 - 1.511, ymax = 12.804 + 1.511), cex = 1, lty = 2, colour = "#C71000B2")+
+  Theme1+
+  geom_errorbar(aes(x = -14.254, 
+                      ymin = 12.804 - 1.511, ymax = 12.804 + 1.511), cex = 1, lty = 2, colour = "#C71000B2")+
   geom_errorbarh(aes(y = 12.804, 
                      xmin = -14.254 - -2.545, xmax = -14.254 + -2.545), cex =1, lty = 2, colour = "#C71000B2")
+
+LGplotA <- LGplotA + theme(legend.position = "none")
+LGplotA
+
 # niche space plot ----
+# read in niche space data ----
 
-
-LB2 <- read.csv(paste(dr.dir,  ("Boharadj.csv"), sep = '/'))%>%
+LG2 <- read.csv(paste(dr.dir,  ("Gibbusadj.csv"), sep = '/'))%>%
   mutate_at(vars(Location), list(as.factor)) %>% # make these columns as factors
   glimpse()
 
@@ -142,21 +149,22 @@ stat_chull <- function(mapping = NULL, data = NULL, geom = "polygon",
 
 # plot out convex hulls for niche space of each species
 
-LBplotB <- ggplot(LB2,aes(x = C, y = N, colour = Location, fill = Location))+
+LGplotB <- ggplot(LG2,aes(x = C, y = N, colour = Location, fill = Location))+
   # geom_point(size = 3.5)+
   stat_chull(size = 0.5, alpha = 0.3)+
   scale_x_continuous(limits = c(-18, -8),breaks=seq(-18, -8, 2))+ 
   scale_y_continuous(limits = c(8,16),breaks=seq(8, 16, 2))+
-  scale_color_manual(values =pal, 
+  scale_color_manual(values =c("Chagos " = "#FF6F00B2", "Maldives " = "#8A4198B2", "SR" = "#C71000B2"),
                      labels = c("Chagos", "Scott Reefs"))+
-  scale_fill_manual(values =pal, 
-                    labels = c("Chagos", "Scott Reefs"))+
+  scale_fill_manual(values =c("Chagos " = "#FF6F00B2", "Maldives " = "#8A4198B2", "SR" = "#C71000B2"),
+                     labels = c("Chagos", "Scott Reefs"))+
   # facet_wrap( ~ Trip, ncol = 1)+
   ylab(expression(atop(bold(~delta^15~"N " ("\u2030 " [vs]~"air"))))) + 
   xlab(expression(atop(bold(~delta^13~"C " ("\u2030 " [vs]~"VPDB"))))) +
   Theme1
 
-LBplotB
+LGplotB <- LGplotB + theme(legend.position = "none")
+LGplotB
 
 
 # niche size box plot ----
