@@ -344,6 +344,6 @@ bohar_plots
 
 setwd(p.dir)
 
-ggsave("Lbohar.tiff", plot=bohar_plots, width=10, height=3.5, dpi=300)
+ggsave("Lbohar.tiff", plot=bohar_plots, width=13, height=4.5, dpi=300)
 
 # Fin

@@ -126,6 +126,10 @@ LG2 <- read.csv(paste(dr.dir,  ("Gibbusadj.csv"), sep = '/'))%>%
   mutate_at(vars(Location), list(as.factor)) %>% # make these columns as factors
   glimpse()
 
+# order factors 
+
+LG2$Location <- factor(LG2$Location, levels = c("Chagos ", "SR", "Maldives "))
+
 # create convex hull function from this website:
 #https://cran.r-project.org/web/packages/ggplot2/vignettes/extending-ggplot2.html
 
@@ -148,6 +152,7 @@ stat_chull <- function(mapping = NULL, data = NULL, geom = "polygon",
 }
 
 # plot out convex hulls for niche space of each species
+# plot B ----
 
 LGplotB <- ggplot(LG2,aes(x = C, y = N, colour = Location, fill = Location))+
   # geom_point(size = 3.5)+
@@ -155,40 +160,31 @@ LGplotB <- ggplot(LG2,aes(x = C, y = N, colour = Location, fill = Location))+
   scale_x_continuous(limits = c(-18, -8),breaks=seq(-18, -8, 2))+ 
   scale_y_continuous(limits = c(8,16),breaks=seq(8, 16, 2))+
   scale_color_manual(values =c("Chagos " = "#FF6F00B2", "Maldives " = "#8A4198B2", "SR" = "#C71000B2"),
-                     labels = c("Chagos", "Scott Reefs"))+
+                     labels = c("Chagos", "Scott Reefs", "Maldives"))+
   scale_fill_manual(values =c("Chagos " = "#FF6F00B2", "Maldives " = "#8A4198B2", "SR" = "#C71000B2"),
-                     labels = c("Chagos", "Scott Reefs"))+
+                     labels = c("Chagos", "Scott Reefs", "Maldives"))+
   # facet_wrap( ~ Trip, ncol = 1)+
   ylab(expression(atop(bold(~delta^15~"N " ("\u2030 " [vs]~"air"))))) + 
   xlab(expression(atop(bold(~delta^13~"C " ("\u2030 " [vs]~"VPDB"))))) +
   Theme1
 
-LGplotB <- LGplotB + theme(legend.position = "none")
 LGplotB
 
 
+
 # niche size box plot ----
-
-install.packages("nicheROVER")
-install.packages("mvtnorm")
-install.packages("siar")
-
+# plot C read in data ----
 library(nicheROVER)
 library(mvtnorm)
 library(siar) #package is not working any more. use install.packages("SIBER") instead
 
+lg <- read.csv("Gibbusadj.csv",stringsAsFactors = FALSE)
 
-lb <- read.csv(paste(dr.dir, ("Boharadj.csv"), sep='/'),stringsAsFactors = FALSE) %>%
-  # mutate_at(vars(Location, Sample.ID), list(as.factor)) %>% # make these columns as factors
-  glimpse()
+# order factors 
 
-# subset to remove muscle tissue samples
-iso_fin <- subset(iso_data,sample_type == "fin clip")
-iso_fin$Trip = factor(iso_fin$Trip, levels=c('1','2'), labels=c("Trip 1", "Trip 2"))
-lb$Location <- as.factor(lb$Location)
+lg$Location <- factor(lg$Location, levels = c("Chagos ", "SR", "Maldives "))
 
-
-attach(lb)
+attach(lg)
 stderr <- function(x) sd(x)/sqrt(length(na.omit(x))) #standard error function
 n_mean=tapply(N,list(Location), mean) #group fish into means by year
 n_meanD=as.data.frame(n_mean)
@@ -196,8 +192,8 @@ c_mean=tapply(C,list(Location), mean) #group fish into means by year
 c_meanD=as.data.frame(c_mean)
 fish=data.frame(n_meanD,c_meanD)
 fish$Location=rownames(fish)#create dataframe so ggplot can read data
-detach(lb)
-fish <-lb
+detach(lg)
+fish <-lg
 aggregate(fish[5:6], fish[1], mean)
 
 
@@ -210,7 +206,7 @@ system.time({
 })
 
 # mu1 (del15N), mu2 (del13C), and Sigma12
-clrs <- c("#FF6F00B2","#C71000B2")
+clrs <- c("#FF6F00B2","#C71000B2", "#8A4198B2")
 par(mar = c(4, 4, 0.5, 0.1) + 0.1, mfrow = c(1, 3))
 niche.par.plot(fish.par, col = clrs, plot.index = 1)
 niche.par.plot(fish.par, col = clrs, plot.index = 2)
@@ -265,7 +261,7 @@ over.stat <- overlap(fish.par, nreps = nsamples, nprob = 10000, alpha = 0.95)
 overlap.plot(over.stat, col = clrs, mean.cred.col = "#3D3B25B2", equal.axis = TRUE, 
              xlab = "Overlap probability (%) -- Niche region size: 95%")
 
-tiff("lb.overlap.tiff", width = 9, height = 6.5, units = 'in', res = 300)
+tiff("lg.overlap.tiff", width = 9, height = 6.5, units = 'in', res = 300)
 overlap.plot(over.stat, col = clrs, mean.cred.col = "#3D3B25B2", equal.axis = TRUE,
              xlab = "Overlap probability (%) -- Niche region size: 95%")
 dev.off()
@@ -298,25 +294,68 @@ rbind(est = colMeans(fish.size),
 # est    4.9574689       10.864757      10.001607 6.643900     9.442132
 # se     0.9335154        2.057572       1.601639 1.058486     2.602830
 
-par(mfrow = c(1,1))
+par(mfrow = c(1,2))
 
-lb.niche.size <- boxplot(fish.size, col = clrs, pch = 16, cex = .5,
-                         ylab = "Niche Size", xlab = "Location", main = "L. bohar", ylim = c(0,35))
+lg.niche.size <- boxplot(fish.size, col = clrs, pch = 16, cex = .5,
+                         ylab = "Niche Size", xlab = "Location", ylim = c(0,30))
 
-tiff("lb.niche.size.tiff", width = 9, height = 6.5, units = 'in', res = 300)
+
+tiff("lg.niche.size.tiff", width = 9, height = 6.5, units = 'in', res = 300)
 niche.size.box <- boxplot(fish.size, col = clrs, pch = 16, cex = .5,ylab = "Niche Size", xlab = "Location", ylim = c(0,35))
 dev.off()
 
+fish.size # to make this a ggplot, let's change this from long to wide format because this is pretty unusable
+fish.size.df <- as.data.frame(fish.size)
+colnames(fish.size.df) # there is a space after Chagos, which is an easy fix and makes everything a little bit annoying to work with
+summary(fish.size.df) 
+
+#install.packages("janitor")
+library(janitor)
+
+#can be done by simply
+fish.size.df <- clean_names(fish.size.df)
+colnames(fish.size.df)
+
+# The arguments to gather():
+# - data: Data object
+# - key: Name of new key column (made from names of data columns)
+# - value: Name of new value column
+# - ...: Names of source columns that contain values
+# - factor_key: Treat the new key column as a factor (instead of character vector)
+
+data_long <- gather(fish.size.df, Location, nichesize, chagos:maldives, factor_key=TRUE)
+glimpse(data_long)
+
+# Now we can use ggboxplot
+
+library(tidyverse)
+library(ggplot2)
+
+#Plot C ----
+
+LGplotC <- ggplot(data_long, aes(x=Location, y=nichesize,  fill=Location))+
+  geom_boxplot(notch=TRUE, show.legend = FALSE)+
+  ylab("Niche Size")+
+  #ggtitle("Lutjanus bohar")+
+  scale_x_discrete(labels=c("chagos" = "Chagos", "sr" = "Scott Reefs","maldives" = "Maldives"))+
+  scale_fill_manual(values =clrs, 
+                    labels = c("Chagos","Scott Reefs", "Maldives"))+
+  ylim(0, 35)+
+  Theme1
+
+LGplotC
+LGplotB
+LGplotA
 
 # Combine plots ----
 
 library(patchwork)
 
-bohar_plots <- LBplotA + LBplotB+ plot_annotation(tag_levels = 'A') + plot_layout(guides = 'collect')
-bohar_plots
+gibbus_plots <- LGplotA + LGplotB + LGplotC + plot_annotation(tag_levels = 'A') + plot_layout(guides = 'collect')
+gibbus_plots
 
 ?ggsave
 
 setwd(p.dir)
 
-ggsave("Lbohar.tiff", plot=bohar_plots, width=10, height=5, dpi=300)
+ggsave("Lgibbus.tiff", plot=gibbus_plots, width=13, height=4.5, dpi=300)
