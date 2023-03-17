@@ -2,7 +2,7 @@
 ## Making figures for publication
 #################################
 
-## 03 C. sordidus graphs
+## 03 C. sordidus/spilurus graphs
 ## Load libraries ----
 
 library(plyr)
@@ -14,6 +14,8 @@ library(MetBrewer)
 #install.packages("ggsci")
 library(ggsci)
 library(scales)
+require(png)
+require(grid)
 
 # clear workspace ----
 rm(list = ls())
@@ -28,6 +30,9 @@ dr.dir <- (paste(w.dir, "Data/Raw", sep='/'))
 
 # Set graph directory - to save plots
 p.dir <- paste(w.dir, "Plots", sep='/')
+f.dir <- paste(w.dir, "fishpics", sep='/')
+
+
 #r.dir <- paste(w.dir, "rasters", sep='/')
 
 
@@ -172,7 +177,7 @@ CSplotB
 
 library(nicheROVER)
 library(mvtnorm)
-library(siar) #package is not working any more. use install.packages("SIBER") instead
+#library(siar) #package is not working any more. use install.packages("SIBER") instead
 
 attach(CS)
 stderr <- function(x) sd(x)/sqrt(length(na.omit(x))) #standard error function
