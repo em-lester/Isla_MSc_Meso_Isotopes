@@ -110,7 +110,7 @@ LBplotA <- ggplot()+
   xlab(expression(atop(bold(~delta^13~"C " ("\u2030 " [vs]~"VPDB")))))+ 
   ylab(expression(atop(bold(~delta^15~"N " ("\u2030 " [vs]~"air")))))+
   ggtitle("Lutjanus bohar")+
-  annotation_custom(bohar.raster, xmin=-18.3, xmax=-13, ymin=15, ymax=16.2) +
+  annotation_custom(bohar.raster, xmin=-18.6, xmax=-13.3, ymin=15, ymax=16.2) +
   geom_errorbar(aes(x = -14.513, 
                          ymin = 13.434 - 1, ymax = 13.434 + 1), cex = 1, lty = 2, colour = "#C71000B2")+
   geom_errorbarh(aes(y = 13.434, 
@@ -119,6 +119,7 @@ LBplotA <- ggplot()+
 
 LBplotA <- LBplotA + theme(legend.position = "none")
 LBplotA
+
 
 # niche space plot ----
 
