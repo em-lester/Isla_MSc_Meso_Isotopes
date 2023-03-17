@@ -13,6 +13,8 @@ library(stringr)
 library(ggplot2)
 library(tidyverse)
 library(MetBrewer)
+require(png)
+require(grid)
 
 # clear workspace ----
 rm(list = ls())
@@ -27,8 +29,8 @@ dr.dir <- (paste(w.dir, "Data/Raw", sep='/'))
 
 # Set graph directory - to save plots
 p.dir <- paste(w.dir, "Plots", sep='/')
+f.dir <- paste(w.dir, "fishpics", sep='/')
 #r.dir <- paste(w.dir, "rasters", sep='/')
-
 
 # Load data ----
 
@@ -84,6 +86,13 @@ Theme1 <- theme_minimal()+
 # CN plot ----
 # LB Plot A ----
 
+# read in fish pic 
+setwd(f.dir)
+dir()
+
+bohar.pic <-readPNG("Lutjanus_bohar.png")
+bohar.raster <- rasterGrob(bohar.pic, interpolate=TRUE)
+
 LBplotA <- ggplot()+ 
   geom_point(data=LB_means, aes(x=Cm, y=Nm, colour=Location, fill=Location))+
   geom_errorbar(data = LB_means, 
@@ -101,6 +110,7 @@ LBplotA <- ggplot()+
   xlab(expression(atop(bold(~delta^13~"C " ("\u2030 " [vs]~"VPDB")))))+ 
   ylab(expression(atop(bold(~delta^15~"N " ("\u2030 " [vs]~"air")))))+
   ggtitle("Lutjanus bohar")+
+  annotation_custom(bohar.raster, xmin=-18.3, xmax=-13, ymin=15, ymax=16.2) +
   geom_errorbar(aes(x = -14.513, 
                          ymin = 13.434 - 1, ymax = 13.434 + 1), cex = 1, lty = 2, colour = "#C71000B2")+
   geom_errorbarh(aes(y = 13.434, 
@@ -162,12 +172,12 @@ LBplotB
 # niche size box plot ----
 
 
-library(siar) #package is not working any more. use install.packages("SIBER") instead
+#library(siar) #package is not working any more. use install.packages("SIBER") instead
 
 library(nicheROVER)
 library(mvtnorm)
 #install.packages("mvtnorm")
-library(siar)
+#library(siar)
 #install.packages("siar")
 dir()
 
