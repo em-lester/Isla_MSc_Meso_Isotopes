@@ -52,6 +52,9 @@ par(mfrow = c(1,1))
 pal <- met.brewer(name="Hokusai3", n=5, type="discrete")
 pal
 
+pal2 <- met.brewer(name="Renoir", n=3, type="discrete")
+pal2
+
 mypal <- pal_futurama("planetexpress", alpha = 0.7)(5)
 mypal
 sp <- show_col(mypal)
@@ -101,6 +104,13 @@ Theme1 <- theme_minimal()+
 # CN plot ----
 # CS Plot A ----
 
+setwd(f.dir)
+dir()
+
+spilurus.pic <-readPNG("Cspilurus.png")
+spilurus.raster <- rasterGrob(spilurus.pic, interpolate=TRUE)
+
+
 CSplot <- ggplot(data = CS_means, ylim = c(6, 14), xlim = c(-19, -17))+ 
   geom_errorbar(data = CS_means, 
                 aes(x = Cm, 
@@ -114,7 +124,8 @@ CSplot <- ggplot(data = CS_means, ylim = c(6, 14), xlim = c(-19, -17))+
                      labels = c("Chagos", "Scott Reefs"))+ 
   xlab(expression(atop(bold(~delta^13~"C " ("\u2030 " [vs]~"VPDB")))))+ 
   ylab(expression(atop(bold(~delta^15~"N " ("\u2030 " [vs]~"air")))))+
-  ggtitle("Chlorurus sordidus")+
+  ggtitle("Chlorurus spilurus")+
+  annotation_custom(spilurus.raster, xmin=-15.8, xmax=-12.8, ymin=10.5, ymax=12) +
   Theme1
 
 CSplotA <- CSplot + theme(legend.position = "none")
