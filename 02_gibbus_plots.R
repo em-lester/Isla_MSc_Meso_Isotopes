@@ -125,7 +125,7 @@ LGplotA <- ggplot()+
   xlab(expression(atop(bold(~delta^13~"C " ("\u2030 " [vs]~"VPDB")))))+ 
   ylab(expression(atop(bold(~delta^15~"N " ("\u2030 " [vs]~"air")))))+
   ggtitle("Lutjanus gibbus")+
-  annotation_custom(gibbus.raster, xmin=-18.3, xmax=-13, ymin=15, ymax=16.2) +
+  annotation_custom(gibbus.raster, xmin=-18.5, xmax=-13.5, ymin=14.8, ymax=16.2) +
   Theme1+
   geom_errorbar(aes(x = -14.254, 
                       ymin = 12.804 - 1.511, ymax = 12.804 + 1.511), cex = 1, lty = 2, colour = "#C71000B2")+
