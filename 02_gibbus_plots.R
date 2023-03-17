@@ -14,6 +14,9 @@ library(MetBrewer)
 #install.packages("ggsci")
 library(ggsci)
 library(scales)
+require(png)
+require(grid)
+
 
 # clear workspace ----
 rm(list = ls())
@@ -28,6 +31,7 @@ dr.dir <- (paste(w.dir, "Data/Raw", sep='/'))
 
 # Set graph directory - to save plots
 p.dir <- paste(w.dir, "Plots", sep='/')
+f.dir <- paste(w.dir, "fishpics", sep='/')
 #r.dir <- paste(w.dir, "rasters", sep='/')
 
 
@@ -42,8 +46,12 @@ dir()
 
 # colour palettes ----
 
+par(mfrow = c(1,1))
 pal <- met.brewer(name="Hokusai3", n=5, type="discrete")
 pal
+
+pal2 <- met.brewer(name="Renoir", n=3, type="discrete")
+pal2
 
 mypal <- pal_futurama("planetexpress", alpha = 0.7)(5)
 mypal
@@ -94,6 +102,13 @@ Theme1 <- theme_minimal()+
 # CN plot ----
 # LG Plot A ----
 
+# read in fish pic 
+setwd(f.dir)
+dir()
+
+gibbus.pic <-readPNG("Lutjanus_gibbus.png")
+gibbus.raster <- rasterGrob(gibbus.pic, interpolate=TRUE)
+
 LGplotA <- ggplot()+ 
   geom_errorbar(data = LG_means, 
                 aes(x = Cm, 
@@ -110,6 +125,7 @@ LGplotA <- ggplot()+
   xlab(expression(atop(bold(~delta^13~"C " ("\u2030 " [vs]~"VPDB")))))+ 
   ylab(expression(atop(bold(~delta^15~"N " ("\u2030 " [vs]~"air")))))+
   ggtitle("Lutjanus gibbus")+
+  annotation_custom(gibbus.raster, xmin=-18.3, xmax=-13, ymin=15, ymax=16.2) +
   Theme1+
   geom_errorbar(aes(x = -14.254, 
                       ymin = 12.804 - 1.511, ymax = 12.804 + 1.511), cex = 1, lty = 2, colour = "#C71000B2")+
@@ -122,6 +138,7 @@ LGplotA
 # niche space plot ----
 # read in niche space data ----
 
+setwd(dr.dir)
 LG2 <- read.csv(paste(dr.dir,  ("Gibbusadj.csv"), sep = '/'))%>%
   mutate_at(vars(Location), list(as.factor)) %>% # make these columns as factors
   glimpse()
@@ -176,7 +193,7 @@ LGplotB
 # plot C read in data ----
 library(nicheROVER)
 library(mvtnorm)
-library(siar) #package is not working any more. use install.packages("SIBER") instead
+#library(siar) #package is not working any more. use install.packages("SIBER") instead
 
 lg <- read.csv("Gibbusadj.csv",stringsAsFactors = FALSE)
 
