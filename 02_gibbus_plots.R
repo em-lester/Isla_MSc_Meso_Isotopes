@@ -274,10 +274,12 @@ round(over.cred[, , , 1])  # display alpha = .95 niche region
 
 # Overlap plot.Before you run this, make sure that you have chosen your
 # alpha level.
+
+setwd(p.dir)
+
 over.stat <- overlap(fish.par, nreps = nsamples, nprob = 10000, alpha = 0.95)
 overlap.plot(over.stat, col = clrs, mean.cred.col = "#3D3B25B2", equal.axis = TRUE, 
              xlab = "Overlap probability (%) -- Niche region size: 95%")
-
 tiff("lg.overlap.tiff", width = 9, height = 6.5, units = 'in', res = 300)
 overlap.plot(over.stat, col = clrs, mean.cred.col = "#3D3B25B2", equal.axis = TRUE,
              xlab = "Overlap probability (%) -- Niche region size: 95%")
@@ -312,7 +314,7 @@ rbind(est = colMeans(fish.size),
 # se     0.9335154        2.057572       1.601639 1.058486     2.602830
 
 par(mfrow = c(1,2))
-
+setwd(p.dir)
 lg.niche.size <- boxplot(fish.size, col = clrs, pch = 16, cex = .5,
                          ylab = "Niche Size", xlab = "Location", ylim = c(0,30))
 
